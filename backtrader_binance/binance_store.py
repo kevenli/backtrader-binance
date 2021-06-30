@@ -121,8 +121,8 @@ class BinanceStore(object):
 
     @retry
     def get_asset_balance(self, asset):
-        balance = self.binance.get_asset_balance(asset)
-        return float(balance['free']), float(balance['locked'])
+        balance = next(filter(lambda x: x['asset'] == asset, self.binance.futures_coin_account_balance()))
+        return float(balance['availableBalance']), float(balance['balance'])
 
     def get_balance(self):
         free, locked = self.get_asset_balance(self.coin_target)
@@ -150,7 +150,10 @@ class BinanceStore(object):
 
     @retry
     def get_symbol_info(self, symbol):
-        return self.binance.get_symbol_info(symbol)
+        #return self.binance.get_symbol_info(symbol)
+        exchange_info = self.binance.futures_coin_exchange_info()
+        return next(filter(lambda x: x['symbol'] == symbol, exchange_info['symbols']))
+        return 
 
     def stop_socket(self):
         self.binance_socket.stop()
